@@ -21,7 +21,7 @@ public class QueensTest {
                 @Override
                 public void run() {
                     Queens q = new Queens(tmp);
-                    boolean findAnswer = q.findSolution(3);
+                    boolean findAnswer = q.findSolution(15);
                     if(!findAnswer) {
                         System.out.println("TEST WITH " + tmp + " QUEENS FAILED!!!");
                         failedTests++;
@@ -40,7 +40,7 @@ public class QueensTest {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        new QueensTest(30, 40).test();
+        new QueensTest(15, 26).test();
     }
 
 }
