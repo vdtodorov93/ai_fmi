@@ -14,8 +14,6 @@ public class Astar {
     private int m;
     private int finalX;
     private int finalY;
-    private int startX;
-    private int startY;
 
     //public Astar(int n, int m, int finalX, int finalY, int startX, int startY) {
     public Astar(int n, int m, int finalX, int finalY) {
@@ -24,13 +22,6 @@ public class Astar {
         this.m = m;
         this.finalX = finalX;
         this.finalY = finalY;
-        //this.startX = startX;
-        //this.startY = startY;
-        for(int i = 0; i < n; i++) {
-            for(int j = 0; j < m; j++) {
-                field[i][j] = calcManhattan(i, j);
-            }
-        }
     }
 
     public void findPath(int startX, int startY) {
@@ -40,32 +31,36 @@ public class Astar {
         };
 
         Set<Node> addedNodes = new HashSet<>();
+        //List<Node> path = new ArrayList<>();
         boolean foundPath = false;
-        List<Node> path = new ArrayList<>();
-        Node finalNode = new Node(finalX, finalY, field[finalX][finalY]);
-        Node start = new Node(startX, startY, field[startX][startY]);
         PriorityQueue<Node> pq = new PriorityQueue<>();
-        pq.add(start);
+        Node startNode = new Node(startX, startY, 0, calcManhattan(startX, startY));
+        Node finalNode = new Node(finalX, finalY, 0, 0);
+        pq.add(startNode);
+        addedNodes.add(startNode);
         while(!pq.isEmpty()) {
             Node currentNode = pq.peek();
             pq.remove();
-            path.add(currentNode);
-
             if(currentNode.equals(finalNode)) {
-                System.out.println("We reached it !");
-                System.out.println(path);
+                System.out.println("We found it!");
+                System.out.println("STEPS: " + currentNode.pathTo);
+                System.out.println("-------------------------------");
                 foundPath = true;
+                print();
                 break;
             }
 
-            for(int i = 0; i < 4; i++) {
+            //List<Node> temporateNodes = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
                 int newX = currentNode.x + directions[0][i];
                 int newY = currentNode.y + directions[1][i];
+
                 if(isValid(newX, newY)) {
-                    Node nodeToAdd = new Node(newX, newY, field[newX][newY]);
+                    Node nodeToAdd = new Node(newX, newY, currentNode.pathTo + 1, calcManhattan(newX, newY));
                     if(!addedNodes.contains(nodeToAdd)) {
                         pq.add(nodeToAdd);
                         addedNodes.add(nodeToAdd);
+                        field[newX][newY] = nodeToAdd.pathTo;
                     }
                 }
             }
@@ -106,7 +101,7 @@ public class Astar {
         Astar st = new Astar(5, 6, 0, 5);
         st.take(2, 3);
         st.take(2, 4);
-        st.take(2, 5);
+        //st.take(2, 5);
         st.take(2, 2);
         st.take(2, 1);
         st.take(2, 1);
@@ -118,12 +113,18 @@ public class Astar {
 class Node implements Comparable<Node>{
     int x;
     int y;
-    int dist;
+    int pathTo;
+    int manhattan;
 
-    public Node(int x, int y, int dist) {
+    public Node(int x, int y, int pathTo, int manhattan) {
         this.x = x;
         this.y = y;
-        this.dist = dist;
+        this.pathTo = pathTo;
+        this.manhattan = manhattan;
+    }
+
+    public int getHeuristic() {
+        return pathTo + manhattan;
     }
 
     @Override
@@ -135,7 +136,6 @@ class Node implements Comparable<Node>{
 
         if (x != node.x) return false;
         return y == node.y;
-
     }
 
     @Override
@@ -147,7 +147,7 @@ class Node implements Comparable<Node>{
 
     @Override
     public int compareTo(Node o) {
-        return Integer.compare(dist, o.dist);
+        return Integer.compare(getHeuristic(), o.getHeuristic());
     }
 
     @Override
@@ -155,7 +155,8 @@ class Node implements Comparable<Node>{
         return "Node{" +
                 "x=" + x +
                 ", y=" + y +
-                ", dist=" + dist +
+                ", pathTo=" + pathTo +
+                ", manhattan=" + manhattan +
                 '}';
     }
 }
